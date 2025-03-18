@@ -1,0 +1,125 @@
+* {
+    margin: 0 auto;
+
+}
+
+.home{
+    background-color: antiquewhite;
+}
+
+.content{
+    display: flex;
+    justify-content: space-between;
+}
+
+.createBlockTask {
+    margin-top: 20px;
+    display: flex;
+    background-color: pink;
+    border-radius: 15px;
+    width: 33%;
+}
+
+.block{
+    display: flex;
+    flex-direction: column;
+
+}
+.block > *{
+    padding: 4px;
+}
+
+.block > button{
+    margin-bottom: 4px;
+}
+
+.section{
+    margin: 5px 0 5px 0;
+}
+
+.textInBlock{
+    color: black;
+}
+
+.tasks-table{
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+.color-table-orange {
+    background-color: indianred;
+    padding: 20px 6% 4% 6%;
+    width: 10%;
+}
+
+.color-table-aqua {
+    background-color: orange;
+    padding: 20px 6% 4% 6%;
+    width: 10%;
+}
+
+.color-table-green {
+    background-color: greenyellow;
+    padding: 20px 6% 4% 6%;
+    width: 10%;
+}
+
+.block-task-second{
+    background-color: aquamarine;
+    padding: 10px 10px 10px 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.block-task-first{
+    background-color: antiquewhite;
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.block-task-third{
+    background-color: antiquewhite;
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+
+p{
+    display: flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-date{
+    flex-wrap: wrap;
+    overflow: unset;
+    text-overflow: unset;
+}
+
+.doneStep{
+    text-decoration: line-through;
+
+}
+
+.pointer{
+    cursor: pointer;
+}
+
+
+.createtask{
+    position: fixed;
+    margin: 10% 0 0 33.5%;
+    box-shadow: -500px -60px 0px 2000px rgba(0, 0, 0, 0.5);
+
+}
+
+.postCreateTask {
+
+}
