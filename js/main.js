@@ -16,6 +16,7 @@ Vue.component('create-task', {
                     <li v-for="(step, index) in steps" :key="index" class="section textInBlock">
                         <input type="text" v-model="step.text" placeholder="Введите задачу" required>
                     </li>
+                    <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
                 </ol>
                 
                 <div>
@@ -34,7 +35,8 @@ Vue.component('create-task', {
             steps: [],
             completedDate: '',
             createDate: '',
-            TableTasks: 1
+            TableTasks: 1,
+            planDate: ''
         };
     },
     methods: {
@@ -50,7 +52,8 @@ Vue.component('create-task', {
                         steps: this.steps,
                         completedDate: this.completedDate,
                         createDate: this.createDate,
-                        TableTasks: this.TableTasks
+                        TableTasks: this.TableTasks,
+                        planDate: this.planDate
                     };
                     this.$emit('task-created', task);
                     this.title = '';
@@ -80,84 +83,6 @@ Vue.component('create-task', {
     }
 });
 
-Vue.component('first-task-list', {
-    props: {
-        tasks: {
-            type: Array,
-            required: true
-        }
-    },
-    template: `
-        <div class="task-list">
-            <h2>Первый лист</h2>
-            
-            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first">
-                <strong>{{ task.title }}</strong>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }" >{{ step.text }}</p>
-                    </li>
-                </ol>
-            </div>
-        </div>
-    `,
-    methods: {
-        selectStep(step) {
-            step.done = !step.done;
-        },
-
-    },
-    watch: {
-        tasks: {
-            handler(newTasks) {
-                localStorage.setItem("tasks", JSON.stringify(newTasks));
-
-            },
-            deep: true
-        }
-    }
-});
-
-Vue.component('third-task-list', {
-    props: {
-        tasks: {
-            type: Array,
-            required: true
-        }
-    },
-    template: `
-        <div class="task-list">
-            <h2>four лист</h2>
-            
-            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first" v-if="task.TableTasks == 3">
-                <strong>{{ task.title }}</strong>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex" >
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }" >{{ step.text }}</p>
-                    </li>
-                </ol>
-                <b class="text-date">Дата создания: {{ task.createDate }}</b>
-                
-            </div>
-        </div>
-    `,
-    methods: {
-
-        selectStep(step) {
-            step.done = !step.done;
-        },
-
-    },
-    watch: {
-        tasks: {
-            handler(newTasks) {
-                localStorage.setItem("tasks", JSON.stringify(newTasks));
-
-            },
-            deep: true
-        }
-    }
-});
 
 Vue.component('four-task-list', {
     props: {
@@ -168,22 +93,25 @@ Vue.component('four-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Третий лист</h2>
-            
-                <div v-for="(task, index) in tasks" :key="index"  class="block-task-third" v-if="task.TableTasks === 4">
-                    <strong>{{ task.title }}</strong>
-                    <ol>
-                        <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p class="doneStep" >{{ step.text }}</p>
+            <h2>Четвертый лист</h2>
+            <div v-for="(task, index) in tasks" :key="index" class="block-task-third" v-if="task.TableTasks === 4">
+                <strong>{{ task.title }}</strong>
+                <ol>
+                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p @click="selectStep(step)" class="doneStep">{{ step.text }}</p>
                     </li>
-                    </ol>
-                    <b class="text-date">Дата создания: {{ task.createDate }}</b>
-                    <b  class="text-date">Дата завершения: {{ task.completionDate }}</b>
-                </div>
-            
+                </ol>
+                <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                <b> Дата окончания: </b>
+                <b> Заплонированая: {{ task.planDate }}</b>
+            </div>
         </div>
     `,
     methods: {
+        changeTable(task, direction) {
+            task.TableTasks += direction;
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
 
     },
     watch: {
@@ -196,6 +124,50 @@ Vue.component('four-task-list', {
     }
 });
 
+
+Vue.component('third-task-list', {
+    props: {
+        tasks: {
+            type: Array,
+            required: true
+        }
+    },
+    template: `
+        <div class="task-list">
+            <h2>Третий лист</h2>
+            <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 3">
+                <strong>{{ task.title }}</strong>
+                <ol>
+                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                    </li>
+                </ol>
+                <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                <div>    
+                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                </div>
+            </div>
+        </div>
+    `,
+    methods: {
+        changeTable(task, direction) {
+            task.TableTasks += direction;
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
+        selectStep(step) {
+            step.done = !step.done;
+        },
+    },
+    watch: {
+        tasks: {
+            handler(newTasks) {
+                localStorage.setItem("tasks", JSON.stringify(newTasks));
+            },
+            deep: true
+        }
+    }
+});
 
 
 Vue.component('second-task-list', {
@@ -208,31 +180,34 @@ Vue.component('second-task-list', {
     template: `
         <div class="task-list">
             <h2>Второй лист</h2>
-            
-                <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
-                    <strong>{{ task.title }}</strong>
-                    <ol>
-                        <li v-for="(step, stepIndex) in task.steps" :key="stepIndex" >
-                            <p v-if="step.done == false" @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
-                            <p v-else :class="{ 'doneStep': step.done}">{{ step.text }}</p>
-                        </li>     
-                    </ol>
-                    <b class="text-date">Дата создания: {{ task.createDate }}</b>
+            <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
+                <strong>{{ task.title }}</strong>
+                <ol>
+                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                    </li>     
+                </ol>
+                <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                <div>    
+                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
                 </div>
-            
+            </div>
         </div>
     `,
     methods: {
+        changeTable(task, direction) {
+            task.TableTasks += direction;
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
         selectStep(step) {
             step.done = !step.done;
         }
-
     },
     watch: {
         tasks: {
             handler(newTasks) {
                 localStorage.setItem("tasks", JSON.stringify(newTasks));
-
             },
             deep: true
         }
@@ -249,35 +224,40 @@ Vue.component('first-task-list', {
     template: `
         <div class="task-list">
             <h2>Первый лист</h2>
-            
-            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first" v-if="task.TableTasks === 1">
+            <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 1">
                 <strong>{{ task.title }}</strong>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }" >{{ step.text }}</p>
+                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
                     </li>
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
-              
+                <div>    
+                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                </div>
             </div>
         </div>
     `,
     methods: {
+        changeTable(task, direction) {
+            task.TableTasks += direction;
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
         selectStep(step) {
             step.done = !step.done;
         },
-
     },
     watch: {
         tasks: {
             handler(newTasks) {
                 localStorage.setItem("tasks", JSON.stringify(newTasks));
-
             },
             deep: true
         }
     }
 });
+
 
 let app = new Vue({
     el: '#app',
@@ -297,24 +277,19 @@ let app = new Vue({
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
         close(modalCreate) {
-            if (this.modalCreate == true){
-                this.modalCreate = false
-            }else{
-                this.modalCreate = true
-            }
+            this.modalCreate = !this.modalCreate;
         }
     },
     template: `
         <div :class="{'postCreateTask': modalCreate, 'home': true}">
-            <create-task v-if="modalCreate == true" @task-created="addTask" class="createtask" @close-crated="close"></create-task>
-             <button @click="close(true)">Создать</button>
-             <div class="tasks-table">
-                <first-task-list :tasks="tasks" class="color-table-orange"></first-task-list>
+            <create-task v-if="modalCreate" @task-created="addTask" class="createtask" @close-crated="close"></create-task>
+            <button @click="close(true)" style="text-align: center">Создать</button>
+            <div class="tasks-table">
+                <first-task-list :tasks="tasks" class="color-table-orange" ></first-task-list>
                 <second-task-list :tasks="tasks" class="color-table-aqua" ></second-task-list>
-                <third-task-list :tasks="tasks" class="color-table-green"></third-task-list>
-                <four-task-list :tasks="tasks"  class="color-table-aqua"></four-task-list>
+                <third-task-list :tasks="tasks" class="color-table-green" ></third-task-list>
+                <four-task-list :tasks="tasks" class="color-table-aqua"></four-task-list>
             </div>
-            
         </div>
     `
 });
