@@ -1,9 +1,5 @@
 Vue.component('create-task', {
     props:{
-        firstTableTasks: {
-            type: Number,
-            required: true
-        },
         modalCreate:{
             type: Boolean,
             required: true
@@ -36,7 +32,9 @@ Vue.component('create-task', {
         return {
             title: '',
             steps: [],
-            completedDate: ''
+            completedDate: '',
+            createDate: '',
+            TableTasks: 1
         };
     },
     methods: {
@@ -46,10 +44,13 @@ Vue.component('create-task', {
                 alert("Ошибка, нельзя писать только пробелы.");
 
             }else{
+                this.createDate = new Date().toLocaleString()
                     let task = {
                         title: this.title,
                         steps: this.steps,
-                        completedDate: this.completedDate
+                        completedDate: this.completedDate,
+                        createDate: this.createDate,
+                        TableTasks: this.TableTasks
                     };
                     this.$emit('task-created', task);
                     this.title = '';
@@ -117,7 +118,7 @@ Vue.component('first-task-list', {
     }
 });
 
-Vue.component('four-task-list', {
+Vue.component('third-task-list', {
     props: {
         tasks: {
             type: Array,
@@ -128,17 +129,20 @@ Vue.component('four-task-list', {
         <div class="task-list">
             <h2>four лист</h2>
             
-            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first">
+            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first" v-if="task.TableTasks == 3">
                 <strong>{{ task.title }}</strong>
                 <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex" >
                         <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }" >{{ step.text }}</p>
                     </li>
                 </ol>
+                <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                
             </div>
         </div>
     `,
     methods: {
+
         selectStep(step) {
             step.done = !step.done;
         },
@@ -155,7 +159,7 @@ Vue.component('four-task-list', {
     }
 });
 
-Vue.component('third-task-list', {
+Vue.component('four-task-list', {
     props: {
         tasks: {
             type: Array,
@@ -166,36 +170,21 @@ Vue.component('third-task-list', {
         <div class="task-list">
             <h2>Третий лист</h2>
             
-                <div v-for="(task, index) in tasks" :key="index"  class="block-task-third">
+                <div v-for="(task, index) in tasks" :key="index"  class="block-task-third" v-if="task.TableTasks === 4">
                     <strong>{{ task.title }}</strong>
                     <ol>
                         <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
                         <p class="doneStep" >{{ step.text }}</p>
                     </li>
                     </ol>
-                    <b class="text-date">Дата завершения: {{ task.completionDate }}</b>
+                    <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                    <b  class="text-date">Дата завершения: {{ task.completionDate }}</b>
                 </div>
             
         </div>
     `,
     methods: {
-        // thirdTaskIf(task) {
-        //     let trueDone = task.steps.filter(step => step.done).length;
-        //     let fullLength = task.steps.length;
-        //
-        //
-        //     if (fullLength === 0) {
-        //         return false;
-        //     }
-        //
-        //     if (trueDone == fullLength && !task.completionDate){
-        //         task.completionDate = new Date().toLocaleString()
-        //         this.$emit('update-tasks', this.tasks);
-        //     }
-        //
-        //
-        //     return trueDone == fullLength;
-        // }
+
     },
     watch: {
         tasks: {
@@ -220,7 +209,7 @@ Vue.component('second-task-list', {
         <div class="task-list">
             <h2>Второй лист</h2>
             
-                <div v-for="(task, index) in tasks" :key="index" class="block-task-second">
+                <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
                     <strong>{{ task.title }}</strong>
                     <ol>
                         <li v-for="(step, stepIndex) in task.steps" :key="stepIndex" >
@@ -228,6 +217,7 @@ Vue.component('second-task-list', {
                             <p v-else :class="{ 'doneStep': step.done}">{{ step.text }}</p>
                         </li>     
                     </ol>
+                    <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 </div>
             
         </div>
@@ -260,13 +250,15 @@ Vue.component('first-task-list', {
         <div class="task-list">
             <h2>Первый лист</h2>
             
-            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first">
+            <div v-for="(task, index) in tasks" :key="index"  class="block-task-first" v-if="task.TableTasks === 1">
                 <strong>{{ task.title }}</strong>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
                         <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }" >{{ step.text }}</p>
                     </li>
                 </ol>
+                <b class="text-date">Дата создания: {{ task.createDate }}</b>
+              
             </div>
         </div>
     `,
@@ -294,30 +286,12 @@ let app = new Vue({
         if (localStorage.getItem("tasks")) {
             tasks = JSON.parse(localStorage.getItem("tasks"));
         }
-        let firstTableTasks = 0
-        if (localStorage.getItem("firstTableTasks")){
-            firstTableTasks = localStorage.getItem("firstTableTasks")
-        }
-        let secondTableTasks = 0
-        if (localStorage.getItem("secondTableTasks")){
-            secondTableTasks = localStorage.getItem("secondTableTasks")
-        }
         return {
             tasks: tasks,
-            firstTableTasks: firstTableTasks,
-            secondTableTasks: secondTableTasks,
             modalCreate: false
         };
     },
     methods: {
-        updateCount(count) {
-            this.firstTableTasks = count;
-            localStorage.setItem("firstTableTasks", this.firstTableTasks);
-        },
-        updateCountSecond(count){
-            this.secondTableTasks = count;
-            localStorage.setItem("secondTableTasks", this.secondTableTasks);
-        },
         addTask(task) {
             this.tasks.push(task);
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
@@ -332,13 +306,13 @@ let app = new Vue({
     },
     template: `
         <div :class="{'postCreateTask': modalCreate, 'home': true}">
-            <create-task v-if="modalCreate == true" @task-created="addTask" :firstTableTasks="firstTableTasks" class="createtask" @close-crated="close"></create-task>
+            <create-task v-if="modalCreate == true" @task-created="addTask" class="createtask" @close-crated="close"></create-task>
              <button @click="close(true)">Создать</button>
              <div class="tasks-table">
-                <first-task-list :tasks="tasks" :secondTableTasks="secondTableTasks" :firstTableTasks="firstTableTasks" @update-count="updateCount" class="color-table-orange"></first-task-list>
-                <second-task-list :tasks="tasks" :secondTableTasks="secondTableTasks" class="color-table-aqua" @update-count="updateCountSecond" ></second-task-list>
+                <first-task-list :tasks="tasks" class="color-table-orange"></first-task-list>
+                <second-task-list :tasks="tasks" class="color-table-aqua" ></second-task-list>
                 <third-task-list :tasks="tasks" class="color-table-green"></third-task-list>
-                <four-task-list :tasks="tasks"  class="color-table-aqua"></four-task-list>>
+                <four-task-list :tasks="tasks"  class="color-table-aqua"></four-task-list>
             </div>
             
         </div>
