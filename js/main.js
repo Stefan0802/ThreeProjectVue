@@ -36,7 +36,8 @@ Vue.component('create-task', {
             completedDate: '',
             createDate: '',
             TableTasks: 1,
-            planDate: ''
+            planDate: '',
+            comment: ''
         };
     },
     methods: {
@@ -137,7 +138,8 @@ Vue.component('third-task-list', {
     },
     data() {
         return {
-            redactTaskIndex: null
+            redactTaskIndex: null,
+            commentTable: ''
         };
     },
     template: `
@@ -165,15 +167,26 @@ Vue.component('third-task-list', {
                     </li>
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
-                <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
+                <b class="text-date" v-if="task.lastModified">Последнее изменение: {{ task.lastModified }}</b>
                 <div>    
-                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                    <textarea v-model="commentTable" cols="10" rows="5" placeholder="Оставьте комментарий"></textarea>
+                    <button @click="comment(task)">Оставить комментарий</button>
                 </div>
             </div>
         </div>
     `,
     methods: {
+        comment(task) {
+            if (this.commentTable.trim()) {
+                task.comment = this.commentTable;
+                this.commentTable = '';
+                localStorage.setItem("tasks", JSON.stringify(this.tasks));
+                this.changeTable(task, -1)
+            } else {
+                alert('Пожалуйста, введите комментарий.');
+            }
+        },
         changeTable(task, direction) {
             task.TableTasks += direction;
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
@@ -208,6 +221,7 @@ Vue.component('third-task-list', {
 });
 
 
+
 Vue.component('second-task-list', {
     props: {
         tasks: {
@@ -217,13 +231,16 @@ Vue.component('second-task-list', {
     },
     data() {
         return {
-            redactTaskIndex: null
+            redactTaskIndex: null,
+
+
         };
     },
     template: `
         <div class="task-list">
             <h2>Задачи в работе</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
+            <strong v-if="task.comment" style="color:red">{{task.comment}}</strong>
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
                     <button @click="saveTask(index)">Сохранить</button>
@@ -335,6 +352,7 @@ Vue.component('first-task-list', {
     `,
     methods: {
         changeTable(task, direction) {
+
             task.TableTasks += direction;
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
@@ -378,7 +396,8 @@ let app = new Vue({
         }
         return {
             tasks: tasks,
-            modalCreate: false
+            modalCreate: false,
+            commentTableTwoCheck: false
         };
     },
     methods: {
@@ -396,8 +415,8 @@ let app = new Vue({
             <button @click="close(true)" style="text-align: center">Создать</button>
             <div class="tasks-table">
                 <first-task-list :tasks="tasks" class="color-table-orange" ></first-task-list>
-                <second-task-list :tasks="tasks" class="color-table-aqua" ></second-task-list>
-                <third-task-list :tasks="tasks" class="color-table-green" ></third-task-list>
+                <second-task-list :commentTableTwoCheck="commentTableTwoCheck" :tasks="tasks" class="color-table-aqua" ></second-task-list>
+                <third-task-list :commentTableTwoCheck="commentTableTwoCheck" :tasks="tasks" class="color-table-green" ></third-task-list>
                 <four-task-list :tasks="tasks" class="color-table-aqua"></four-task-list>
             </div>
         </div>
