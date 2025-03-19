@@ -53,7 +53,7 @@ Vue.component('create-task', {
                         completedDate: this.completedDate,
                         createDate: this.createDate,
                         TableTasks: this.TableTasks,
-                        planDate: this.planDate
+                        planDate: new Date(this.planDate)
                     };
                     this.$emit('task-created', task);
                     this.title = '';
@@ -93,37 +93,40 @@ Vue.component('four-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Четвертый лист</h2>
-            <div v-for="(task, index) in tasks" :key="index" class="block-task-third" v-if="task.TableTasks === 4">
+            <h2>Завершенные задачи</h2>
+            <div v-for="(task, index) in tasks" :key="index" v-if="thirdTaskIf(task)" class="block-task-third">
                 <strong>{{ task.title }}</strong>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" class="doneStep">{{ step.text }}</p>
+                        <p class="doneStep">{{ step.text }}</p>
                     </li>
                 </ol>
-                <b class="text-date">Дата создания: {{ task.createDate }}</b>
-                <b> Дата окончания: </b>
-                <b> Заплонированая: {{ task.planDate }}</b>
+                
+                <p v-if="task.completionDate <= task.planDate">Вы успели вовремя</p>
+                <p v-else >Просрочено :(</p>
             </div>
         </div>
     `,
     methods: {
-        changeTable(task, direction) {
-            task.TableTasks += direction;
-            localStorage.setItem("tasks", JSON.stringify(this.tasks));
-        },
+        thirdTaskIf(task) {
+            let trueDone = task.steps.filter(step => step.done).length;
+            let fullLength = task.steps.length;
 
-    },
-    watch: {
-        tasks: {
-            handler(newTasks) {
-                localStorage.setItem("tasks", JSON.stringify(newTasks));
-            },
-            deep: true
+            if (fullLength === 0) {
+                return false;
+            }
+
+            if (task.TableTasks === 4) {
+                if (!task.completionDate) {
+                    task.completionDate = new Date();
+                    localStorage.setItem("tasks", JSON.stringify(this.tasks));
+                }
+            }
+
+            return task.TableTasks === 4;
         }
     }
 });
-
 
 Vue.component('third-task-list', {
     props: {
@@ -139,7 +142,7 @@ Vue.component('third-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Третий лист</h2>
+            <h2>Тестирование</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 3">
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
@@ -219,7 +222,7 @@ Vue.component('second-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Второй лист</h2>
+            <h2>Задачи в работе</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
@@ -299,7 +302,7 @@ Vue.component('first-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Первый лист</h2>
+            <h2>Заплонированные задачи</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 1">
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
