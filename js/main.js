@@ -132,17 +132,37 @@ Vue.component('third-task-list', {
             required: true
         }
     },
+    data() {
+        return {
+            redactTaskIndex: null
+        };
+    },
     template: `
         <div class="task-list">
             <h2>Третий лист</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 3">
-                <strong>{{ task.title }}</strong>
+                <div v-if="redactTaskIndex === index">
+                    <input v-model="task.title" />
+                    <button @click="saveTask(index)">Сохранить</button>
+                    <button @click="cancelEdit">Отменить</button>
+                </div>
+                <div v-else>
+                    <strong>{{ task.title }}</strong>
+                    <button @click="editTask(index)">Редактировать</button>
+                    <button @click="deleteTask(index)">Удалить</button>
+                </div>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        <div v-if="redactTaskIndex === index">
+                            <input v-model="step.text" />
+                        </div>
+                        <div v-else>
+                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        </div>
                     </li>
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
                 <div>    
                     <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
@@ -158,6 +178,21 @@ Vue.component('third-task-list', {
         selectStep(step) {
             step.done = !step.done;
         },
+        editTask(index) {
+            this.redactTaskIndex = index;
+        },
+        saveTask(index) {
+            this.redactTaskIndex = null;
+            this.tasks[index].lastModified = new Date().toLocaleString();
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
+        cancelEdit() {
+            this.redactTaskIndex = null;
+        },
+        deleteTask(index) {
+            this.tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        }
     },
     watch: {
         tasks: {
@@ -177,17 +212,37 @@ Vue.component('second-task-list', {
             required: true
         }
     },
+    data() {
+        return {
+            redactTaskIndex: null
+        };
+    },
     template: `
         <div class="task-list">
             <h2>Второй лист</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
-                <strong>{{ task.title }}</strong>
+                <div v-if="redactTaskIndex === index">
+                    <input v-model="task.title" />
+                    <button @click="saveTask(index)">Сохранить</button>
+                    <button @click="cancelEdit">Отменить</button>
+                </div>
+                <div v-else>
+                    <strong>{{ task.title }}</strong>
+                    <button @click="editTask(index)">Редактировать</button>
+                    <button @click="deleteTask(index)">Удалить</button>
+                </div>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        <div v-if="redactTaskIndex === index">
+                            <input v-model="step.text" />
+                        </div>
+                        <div v-else>
+                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        </div>
                     </li>     
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
+                <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
                 <div>    
                     <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
@@ -202,6 +257,21 @@ Vue.component('second-task-list', {
         },
         selectStep(step) {
             step.done = !step.done;
+        },
+        editTask(index) {
+            this.redactTaskIndex = index;
+        },
+        saveTask(index) {
+            this.redactTaskIndex = null;
+            this.tasks[index].lastModified = new Date().toLocaleString();
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
+        cancelEdit() {
+            this.redactTaskIndex = null;
+        },
+        deleteTask(index) {
+            this.tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
         }
     },
     watch: {
@@ -214,6 +284,7 @@ Vue.component('second-task-list', {
     }
 });
 
+
 Vue.component('first-task-list', {
     props: {
         tasks: {
@@ -221,19 +292,39 @@ Vue.component('first-task-list', {
             required: true
         }
     },
+    data() {
+        return {
+            redactTaskIndex: null
+        };
+    },
     template: `
         <div class="task-list">
             <h2>Первый лист</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 1">
-                <strong>{{ task.title }}</strong>
+                <div v-if="redactTaskIndex === index">
+                    <input v-model="task.title" />
+                    <button @click="saveTask(index)">Сохранить</button>
+                    <button @click="cancelEdit">Отменить</button>
+                </div>
+                <div v-else>
+                    <strong>{{ task.title }}</strong>
+                    <button @click="editTask(index)">Редактировать</button>
+                    <button @click="deleteTask(index)">Удалить</button>
+                </div>
                 <ol>
                     <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        <div v-if="redactTaskIndex === index">
+                            <input v-model="step.text" />
+                        </div>
+                        <div v-else>
+                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                        </div>
                     </li>
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
-                <div>    
-                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
+                <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
+                <div>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
                 </div>
             </div>
@@ -247,6 +338,21 @@ Vue.component('first-task-list', {
         selectStep(step) {
             step.done = !step.done;
         },
+        editTask(index) {
+            this.redactTaskIndex = index;
+        },
+        saveTask(index) {
+            this.redactTaskIndex = null;
+            this.tasks[index].lastModified = new Date().toLocaleString();
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        },
+        cancelEdit() {
+            this.redactTaskIndex = null;
+        },
+        deleteTask(index) {
+            this.tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(this.tasks));
+        }
     },
     watch: {
         tasks: {
@@ -257,6 +363,7 @@ Vue.component('first-task-list', {
         }
     }
 });
+
 
 
 let app = new Vue({
