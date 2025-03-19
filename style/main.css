@@ -119,6 +119,29 @@ p{
 
 }
 
-.postCreateTask {
+.button{
+    border: none;
+    background-color: antiquewhite;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.button:hover{
+    font-size: 22px;
+}
+
+.bg-2{
+    background-color: aquamarine;
+}
+
+.text-but{
+    font-size: 10px;
+}
+
+.text-but:hover{
+    font-size: 11px;
+}
+
+.bg-3{
 
 }

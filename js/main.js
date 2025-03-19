@@ -19,6 +19,15 @@ Vue.component('create-task', {
                     <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
                 </ol>
                 
+                <label for="">Выберите приоритет</label>
+                <select v-model="property">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+                
                 <div>
                     <button type="button" @click="addStep" :disabled="steps.length === 5" >добавить шаг</button>
                     <button type="button" @click="removeStep" :disabled="steps.length <= 3 ">убавить шаг</button>
@@ -37,7 +46,8 @@ Vue.component('create-task', {
             createDate: '',
             TableTasks: 1,
             planDate: '',
-            comment: ''
+            comment: '',
+            property: 0
         };
     },
     methods: {
@@ -54,7 +64,8 @@ Vue.component('create-task', {
                         completedDate: this.completedDate,
                         createDate: this.createDate,
                         TableTasks: this.TableTasks,
-                        planDate: new Date(this.planDate)
+                        planDate: new Date(this.planDate),
+                        property: this.property
                     };
                     this.$emit('task-created', task);
                     this.title = '';
@@ -168,10 +179,10 @@ Vue.component('third-task-list', {
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date" v-if="task.lastModified">Последнее изменение: {{ task.lastModified }}</b>
-                <div>    
-                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                <div>       
                     <textarea v-model="commentTable" cols="10" rows="5" placeholder="Оставьте комментарий"></textarea>
-                    <button @click="comment(task)">Оставить комментарий</button>
+                    <button @click="comment(task)" class="button text-but">comment and left</button>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-3">➡️</button>
                 </div>
             </div>
         </div>
@@ -264,8 +275,8 @@ Vue.component('second-task-list', {
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
                 <div>    
-                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1">влево</button>
-                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                    <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1" class="button bg-2">⬅️</button>
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-2">➡️</button>
                 </div>
             </div>
         </div>
@@ -343,9 +354,8 @@ Vue.component('first-task-list', {
                 </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
-                <div>
-                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
-                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4">вправо</button>
+                <div>   
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button">➡️ </button>
                 </div>
             </div>
         </div>
@@ -403,6 +413,7 @@ let app = new Vue({
     methods: {
         addTask(task) {
             this.tasks.push(task);
+
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
         close(modalCreate) {
@@ -412,7 +423,7 @@ let app = new Vue({
     template: `
         <div :class="{'postCreateTask': modalCreate, 'home': true}">
             <create-task v-if="modalCreate" @task-created="addTask" class="createtask" @close-crated="close"></create-task>
-            <button @click="close(true)" style="text-align: center">Создать</button>
+            <button @click="close(true)" style="">➕</button>
             <div class="tasks-table">
                 <first-task-list :tasks="tasks" class="color-table-orange" ></first-task-list>
                 <second-task-list :commentTableTwoCheck="commentTableTwoCheck" :tasks="tasks" class="color-table-aqua" ></second-task-list>
