@@ -13,13 +13,9 @@ Vue.component('create-task', {
                     <label for="title" class="textInBlock">Title</label>
                     <input type="text" v-model="title" required placeholder="Заголовок">
                     
-                    <ol>
-                        <li v-for="(step, index) in steps" :key="index" class="section textInBlock">
-                            <input type="text" v-model="step.text" placeholder="Введите задачу" required>
-                        </li>
-                        <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
-                    </ol>
-                
+                    <textarea v-model="comment" cols="30" rows="10" placeholder="Введите задачу" style="max-width: 320px; max-height: 320px"></textarea>
+
+                    <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
                     <label for="">Выберите приоритет</label>
                     <select v-model="property">
                         <option>1</option>
@@ -30,11 +26,7 @@ Vue.component('create-task', {
                     </select>
                     
                     <div>
-                        <button type="button" @click="addStep" :disabled="steps.length === 5" >добавить шаг</button>
-                        <button type="button" @click="removeStep" :disabled="steps.length <= 3 ">убавить шаг</button>
-                    </div>
-                    <div>
-                        <button @click="onSubmit" :disabled="steps.length === 0" >отправить</button>
+                        <button @click="onSubmit" :disabled="comment.length === 0" >отправить</button>
                         <button @click="$emit('close-crated')">Закрыть</button>
                     </div>
                 </form>
@@ -68,7 +60,8 @@ Vue.component('create-task', {
                         createDate: this.createDate,
                         TableTasks: this.TableTasks,
                         planDate: new Date(this.planDate),
-                        property: this.property
+                        property: this.property,
+                        comment: this.comment
                     };
                     this.$emit('task-created', task);
                     this.title = '';
@@ -111,11 +104,10 @@ Vue.component('four-task-list', {
             <h2>Завершенные задачи</h2>
             <div v-for="(task, index) in tasks" :key="index" v-if="thirdTaskIf(task)" class="block-task-third">
                 <strong>{{ task.title }}</strong>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <p class="doneStep">{{ step.text }}</p>
-                    </li>
-                </ol>
+                
+                <div>
+                    <p>{{ task.comment }}</p>
+                </div>
                 
                 <p v-if="task.completionDate <= task.planDate">Вы успели вовремя</p>
                 <p v-else >Просрочено :(</p>
@@ -124,12 +116,6 @@ Vue.component('four-task-list', {
     `,
     methods: {
         thirdTaskIf(task) {
-            let trueDone = task.steps.filter(step => step.done).length;
-            let fullLength = task.steps.length;
-
-            if (fullLength === 0) {
-                return false;
-            }
 
             if (task.TableTasks === 4) {
                 if (!task.completionDate) {
@@ -153,48 +139,40 @@ Vue.component('third-task-list', {
     data() {
         return {
             redactTaskIndex: null,
-            commentTable: ''
+            steps: [],
         };
     },
     template: `
         <div class="task-list">
             <h2>Тестирование</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 3">
-                <div v-if="redactTaskIndex === index">
-                    <input v-model="task.title" />
-                    <button @click="saveTask(index)">Сохранить</button>
-                    <button @click="cancelEdit">Отменить</button>
-                </div>
-                <div v-else>
+                
                     <strong>{{ task.title }}</strong>
-                    <button @click="editTask(index)">Редактировать</button>
-                    <button @click="deleteTask(index)">Удалить</button>
-                </div>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
-                        <div v-if="redactTaskIndex === index">
-                            <input v-model="step.text" />
-                        </div>
-                        <div v-else>
-                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
-                        </div>
-                    </li>
-                </ol>
+                    <div>
+                        <p>{{ task.comment }}</p>
+                    </div>
+                    
+                
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date" v-if="task.lastModified">Последнее изменение: {{ task.lastModified }}</b>
                 <div>       
-                    <textarea v-model="commentTable" cols="13" rows="5" placeholder="Оставьте комментарий" style="max-width: 110px"></textarea>
+                    <textarea v-model="steps" cols="13" rows="5" placeholder="Оставьте комментарий" style="max-width: 110px"></textarea>
                     <button @click="comment(task)" class="button text-but">comment and left</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-3">➡️</button>
                 </div>
+                <ol>
+                        <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p>{{ step }}</p>
+                    </li>
+                    </ol>
             </div>
         </div>
     `,
     methods: {
         comment(task) {
-            if (this.commentTable.trim()) {
-                task.comment = this.commentTable;
-                this.commentTable = '';
+            if (this.steps.trim()) {
+                task.steps.push(this.steps);
+                this.steps = '';
                 localStorage.setItem("tasks", JSON.stringify(this.tasks));
                 this.changeTable(task, -1)
             } else {
@@ -254,7 +232,7 @@ Vue.component('second-task-list', {
         <div class="task-list">
             <h2>Задачи в работе</h2>
             <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks === 2">
-            <strong v-if="task.comment" style="color:red">{{task.comment}}</strong>
+            
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
                     <button @click="saveTask(index)">Сохранить</button>
@@ -264,22 +242,27 @@ Vue.component('second-task-list', {
                     <strong>{{ task.title }}</strong>
                     <button @click="editTask(index)">Редактировать</button>
                     <button @click="deleteTask(index)">Удалить</button>
-                </div>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                </div>                    
                         <div v-if="redactTaskIndex === index">
-                            <input v-model="step.text" />
+                            <input v-model="task.comment" />
                         </div>
                         <div v-else>
-                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                            <div>
+                                <p>{{ task.comment }}</p>
+                            </div>
                         </div>
-                    </li>     
-                </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
                 <div>    
                     <button @click="changeTable(task, -1)" :disabled="task.TableTasks === 1" class="button bg-2">⬅️</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-2">➡️</button>
+                </div>
+                <div>
+                    <ol>
+                        <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p>{{ step }}</p>
+                    </li>
+                    </ol>
                 </div>
             </div>
         </div>
@@ -333,8 +316,8 @@ Vue.component('first-task-list', {
     },
     template: `
         <div class="task-list">
-            <h2>Заплонированные задачи</h2>
-            <div v-for="(task, index) in tasks" :key="index" class="block-task-first" v-if="task.TableTasks === 1">
+            <h2>Задачи в работе</h2>
+            <div v-for="(task, index) in tasks" :key="index" class="block-task-second" v-if="task.TableTasks == 1">
                 <div v-if="redactTaskIndex === index">
                     <input v-model="task.title" />
                     <button @click="saveTask(index)">Сохранить</button>
@@ -344,22 +327,26 @@ Vue.component('first-task-list', {
                     <strong>{{ task.title }}</strong>
                     <button @click="editTask(index)">Редактировать</button>
                     <button @click="deleteTask(index)">Удалить</button>
-                </div>
-                <ol>
-                    <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                </div>                    
                         <div v-if="redactTaskIndex === index">
-                            <input v-model="step.text" />
+                            <input v-model="task.comment" />
                         </div>
                         <div v-else>
-                            <p @click="selectStep(step)" :class="{ 'doneStep': step.done, 'pointer': true }">{{ step.text }}</p>
+                            <div>
+                                <p>{{ task.comment }}</p>
+                            </div>
                         </div>
-                    </li>
-                </ol>
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date">Последнее изменение: {{ task.lastModified }}</b>
-                <div>   
-                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button">➡️ </button>
+                <div>    
+                    
+                    <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-2">➡️</button>
                 </div>
+                <ol>
+                        <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                        <p>{{ step }}</p>
+                    </li>
+                    </ol>
             </div>
         </div>
     `,
@@ -416,7 +403,6 @@ Vue.component('search-modal', {
     },
     computed: {
         filteredTasks() {
-
             return this.tasks.filter(task => task.title.toLowerCase().includes(this.searchTerm.toLowerCase()) || task.steps.some(step => step.text.toLowerCase().includes(this.searchTerm.toLowerCase())));
         }
     },
