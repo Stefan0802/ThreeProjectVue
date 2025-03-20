@@ -180,7 +180,7 @@ Vue.component('third-task-list', {
                 <b class="text-date">Дата создания: {{ task.createDate }}</b>
                 <b class="text-date" v-if="task.lastModified">Последнее изменение: {{ task.lastModified }}</b>
                 <div>       
-                    <textarea v-model="commentTable" cols="10" rows="5" placeholder="Оставьте комментарий"></textarea>
+                    <textarea v-model="commentTable" cols="13" rows="5" placeholder="Оставьте комментарий" style="max-width: 110px"></textarea>
                     <button @click="comment(task)" class="button text-but">comment and left</button>
                     <button @click="changeTable(task, 1)" :disabled="task.TableTasks === 4" class="button bg-3">➡️</button>
                 </div>
@@ -403,6 +403,7 @@ let app = new Vue({
         let tasks = [];
         if (localStorage.getItem("tasks")) {
             tasks = JSON.parse(localStorage.getItem("tasks"));
+            this.tasks.sort((a, b) => a.property - b.property);
         }
         return {
             tasks: tasks,
@@ -413,7 +414,7 @@ let app = new Vue({
     methods: {
         addTask(task) {
             this.tasks.push(task);
-
+            this.tasks.sort((a, b) => a.property - b.property);
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
         close(modalCreate) {
