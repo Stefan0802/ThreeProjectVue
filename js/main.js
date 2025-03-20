@@ -7,36 +7,39 @@ Vue.component('create-task', {
 
     },
     template: `
-        <div class="createBlockTask">
-            <form @submit.prevent="onSubmit" class="block">
-                <label for="title" class="textInBlock">Title</label>
-                <input type="text" v-model="title" required placeholder="Заголовок">
+        <div class="back-create">
+            <div class="createBlockTask">
+                <form class="block">
+                    <label for="title" class="textInBlock">Title</label>
+                    <input type="text" v-model="title" required placeholder="Заголовок">
+                    
+                    <ol>
+                        <li v-for="(step, index) in steps" :key="index" class="section textInBlock">
+                            <input type="text" v-model="step.text" placeholder="Введите задачу" required>
+                        </li>
+                        <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
+                    </ol>
                 
-                <ol>
-                    <li v-for="(step, index) in steps" :key="index" class="section textInBlock">
-                        <input type="text" v-model="step.text" placeholder="Введите задачу" required>
-                    </li>
-                    <input type="date" placeholder="Какая дата заплонирована?" v-model="planDate">
-                </ol>
-                
-                <label for="">Выберите приоритет</label>
-                <select v-model="property">
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
-                </select>
-                
-                <div>
-                    <button type="button" @click="addStep" :disabled="steps.length === 5" >добавить шаг</button>
-                    <button type="button" @click="removeStep" :disabled="steps.length <= 3 ">убавить шаг</button>
-                </div>
-                
-                <button type="submit" :disabled="steps.length === 0" >отправить</button>
-            </form>
-        </div>
-        
+                    <label for="">Выберите приоритет</label>
+                    <select v-model="property">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                    </select>
+                    
+                    <div>
+                        <button type="button" @click="addStep" :disabled="steps.length === 5" >добавить шаг</button>
+                        <button type="button" @click="removeStep" :disabled="steps.length <= 3 ">убавить шаг</button>
+                    </div>
+                    <div>
+                        <button @click="onSubmit" :disabled="steps.length === 0" >отправить</button>
+                        <button @click="$emit('close-crated')">Закрыть</button>
+                    </div>
+                </form>
+            </div>
+        </div>    
     `,
     data() {
         return {
@@ -395,6 +398,52 @@ Vue.component('first-task-list', {
     }
 });
 
+Vue.component('search-modal', {
+    props: {
+        tasks: {
+            type: Array,
+            required: true
+        },
+        modalSearch: {
+            type: Boolean,
+            required: true
+        }
+    },
+    data() {
+        return {
+            searchTerm: '',
+        };
+    },
+    computed: {
+        filteredTasks() {
+
+            return this.tasks.filter(task => task.title.toLowerCase().includes(this.searchTerm.toLowerCase()) || task.steps.some(step => step.text.toLowerCase().includes(this.searchTerm.toLowerCase())));
+        }
+    },
+    template: `
+        <div class="search-modal" >
+            <div class="modal-content">
+                <h2>Поиск задач</h2>
+                <input type="text" v-model="searchTerm" placeholder="Введите текст для поиска" />
+                <button @click="$emit('close-search')">Закрыть</button>
+                <div class="search-results">
+                    <h3>Результаты поиска:</h3>
+                    <div v-if="filteredTasks.length == 0" >Задачи не найдены</div>
+                    <div v-for="(task, index) in filteredTasks" :key="index" class="task-item" class="block-task-search">
+                        <strong>{{ task.title }}</strong>
+                        <ol>
+                            <li v-for="(step, stepIndex) in task.steps" :key="stepIndex">
+                                {{ step.text }}
+                            </li>
+                        </ol>
+                        <p>Сечас находится в столбике № {{ task.TableTasks }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `
+});
+
 
 
 let app = new Vue({
@@ -403,12 +452,11 @@ let app = new Vue({
         let tasks = [];
         if (localStorage.getItem("tasks")) {
             tasks = JSON.parse(localStorage.getItem("tasks"));
-            this.tasks.sort((a, b) => a.property - b.property);
         }
         return {
             tasks: tasks,
             modalCreate: false,
-            commentTableTwoCheck: false
+            modalSearch: false,
         };
     },
     methods: {
@@ -417,20 +465,34 @@ let app = new Vue({
             this.tasks.sort((a, b) => a.property - b.property);
             localStorage.setItem("tasks", JSON.stringify(this.tasks));
         },
-        close(modalCreate) {
-            this.modalCreate = !this.modalCreate;
+        open(){
+            this.modalCreate = true;
+        },
+        close() {
+            this.modalCreate = false;
+        },
+        openSearch() {
+            this.modalSearch = true;
+        },
+        closeSearch() {
+            this.modalSearch = false;
         }
     },
     template: `
         <div :class="{'postCreateTask': modalCreate, 'home': true}">
             <create-task v-if="modalCreate" @task-created="addTask" class="createtask" @close-crated="close"></create-task>
-            <button @click="close(true)" style="">➕</button>
+            <search-modal v-if="modalSearch" :tasks="tasks" :modalSearch="modalSearch" @close-search="closeSearch"></search-modal> 
+            <div class="button-panel-div">
+                <button @click="open" class="button-panel-plus">➕</button>
+                <button @click="openSearch" class="button-panel-search">🔍</button> 
+            </div>
             <div class="tasks-table">
-                <first-task-list :tasks="tasks" class="color-table-orange" ></first-task-list>
-                <second-task-list :commentTableTwoCheck="commentTableTwoCheck" :tasks="tasks" class="color-table-aqua" ></second-task-list>
-                <third-task-list :commentTableTwoCheck="commentTableTwoCheck" :tasks="tasks" class="color-table-green" ></third-task-list>
+                <first-task-list :tasks="tasks" class="color-table-orange"></first-task-list>
+                <second-task-list :tasks="tasks" class="color-table-aqua"></second-task-list>
+                <third-task-list :tasks="tasks" class="color-table-green"></third-task-list>
                 <four-task-list :tasks="tasks" class="color-table-aqua"></four-task-list>
             </div>
+            
         </div>
     `
 });

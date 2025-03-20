@@ -1,9 +1,11 @@
 * {
     margin: 0 auto;
+    top: -10px;
 }
 
 .body{
     background-color: antiquewhite;
+
 }
 
 .content{
@@ -11,8 +13,15 @@
     justify-content: space-between;
 }
 
+.back-create{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0, 0.2);
+}
+
 .createBlockTask {
-    margin-top: 20px;
+    margin-top: 8%;
     display: flex;
     background-color: pink;
     border-radius: 15px;
@@ -112,12 +121,7 @@ p{
 }
 
 
-.createtask{
-    position: fixed;
-    margin: 10% 0 0 33.5%;
-    box-shadow: -500px -60px 0px 2000px rgba(0, 0, 0, 0.5);
 
-}
 
 .button{
     border: none;
@@ -144,4 +148,64 @@ p{
 
 .bg-3{
 
+}
+
+.search-modal{
+    position: absolute;
+    background-color: rgba( 0, 0, 0, 0.2);
+    width: 100%;
+    height: 120%;
+}
+
+.modal-content{
+    margin: 30px 0 0 40%;
+    background-color: aqua;
+    width: 16%;
+    padding: 10px 10px 10px 10px;
+    border-radius: 20px;
+}
+
+.button-panel-div{
+    margin-top: 10px;
+    width: 200px;
+    justify-content: space-between;
+    display: flex;
+}
+
+.button-panel-search{
+    border: none;
+    width: 100px;
+    background-color: orange;
+    border-radius: 5px;
+    font-size: 20px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.button-panel-search:hover{
+
+    width: 120px;
+}
+
+.button-panel-plus{
+    border: none;
+    width: 100px;
+    background-color: orange;
+    border-radius: 5px;
+    font-size: 20px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.button-panel-plus:hover{
+
+    width: 120px;
+}
+
+.block-task-search{
+    background-color: greenyellow;
+    margin-top: 20px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 10px;
 }
